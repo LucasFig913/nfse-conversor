@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conversor NFS-e XML → PDF</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f4f1;
+      --surface: #ffffff;
+      --surface-2: #f0efec;
+      --border: rgba(0,0,0,0.12);
+      --border-hover: rgba(0,0,0,0.25);
+      --text: #1a1a1a;
+      --text-muted: #6b6b68;
+      --accent: #1a3faa;
+      --accent-light: #e8edf8;
+      --success: #1a7a4a;
+      --success-light: #e6f4ec;
+      --danger: #b83232;
+      --danger-light: #fceaea;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 4rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 1.75rem;
+      font-weight: normal;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    header h1 span {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    #drop-area {
+      border: 1.5px dashed var(--border-hover);
+      border-radius: var(--radius);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    #drop-area:hover, #drop-area.drag-over {
+      background: var(--accent-light);
+      border-color: var(--accent);
+    }
+
+    #drop-area i {
+      font-size: 2.5rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 0.75rem;
+    }
+
+    #drop-area p.label {
+      font-size: 1rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    #drop-area p.sub {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      font-family: 'Courier New', monospace;
+    }
+
+    #file-list {
+      margin-top: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border-radius: var(--radius-sm);
+      border: 0.5px solid var(--border);
+      font-size: 0.87rem;
+    }
+
+    .file-row i { font-size: 1.1rem; color: var(--text-muted); flex-shrink: 0; }
+    .file-row .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: 'Courier New', monospace; font-size: 0.82rem; }
+    .file-row .status { font-size: 0.78rem; flex-shrink: 0; color: var(--text-muted); }
+    .file-row .status.ok { color: var(--success); font-weight: bold; }
+    .file-row .status.err { color: var(--danger); font-weight: bold; }
+
+    .actions {
+      margin-top: 1.25rem;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      border: 0.5px solid var(--border-hover);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.87rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.12s;
+    }
+
+    button:hover { background: var(--surface-2); }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    button.primary:hover { background: #152e88; }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Conversor <span>NFS-e</span> XML → PDF</h1>
+    <p>padrão SPED · fazenda.gov.br · processamento local</p>
+  </header>
+
+  <div class="card">
+    <div id="drop-area"
+      onclick="document.getElementById('file-input').click()"
+      ondragover="onDragOver(event)"
+      ondragleave="onDragLeave(event)"
+      ondrop="onDrop(event)"
+    >
+      <i class="ti ti-file-upload"></i>
+      <p class="label">Arraste XMLs aqui ou clique para selecionar</p>
+      <p class="sub">Aceita múltiplos arquivos .xml de NFS-e</p>
+      <input type="file" id="file-input" accept=".xml" multiple style="display:none" onchange="handleFiles(this.files)">
+    </div>
+
+    <div id="file-list"></div>
+
+    <div class="actions" id="actions" style="display:none;">
+      <button class="primary" id="btn-convert" onclick="convertAll()">
+        <i class="ti ti-file-download"></i> Gerar PDFs
+      </button>
+      <button id="btn-clear" onclick="clearAll()">
+        <i class="ti ti-trash"></i> Limpar
+      </button>
+    </div>
+  </div>
+
+  <footer>processamento 100% local · nenhum arquivo é enviado a servidores</footer>
+
+  <script>
+    let files = [];
+
+    function onDragOver(e) {
+      e.preventDefault();
+      document.getElementById('drop-area').classList.add('drag-over');
+    }
+    function onDragLeave(e) {
+      document.getElementById('drop-area').classList.remove('drag-over');
+    }
+    function onDrop(e) {
+      e.preventDefault();
+      document.getElementById('drop-area').classList.remove('drag-over');
+      const dropped = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.xml'));
+      addFiles(dropped);
+    }
+    function handleFiles(fileList) {
+      addFiles(Array.from(fileList));
+    }
+    function addFiles(newFiles) {
+      newFiles.forEach(f => {
+        if (!files.find(x => x.name === f.name)) files.push(f);
+      });
+      renderList();
+    }
+
+    function renderList() {
+      const list = document.getElementById('file-list');
+      list.innerHTML = '';
+      files.forEach((f, i) => {
+        const row = document.createElement('div');
+        row.className = 'file-row';
+        row.id = 'row-' + i;
+        row.innerHTML = `
+          <i class="ti ti-file-text"></i>
+          <span class="name">${f.name}</span>
+          <span class="status" id="status-${i}">aguardando</span>
+        `;
+        list.appendChild(row);
+      });
+      document.getElementById('actions').style.display = files.length ? 'flex' : 'none';
+    }
+
+    function clearAll() {
+      files = [];
+      document.getElementById('file-list').innerHTML = '';
+      document.getElementById('actions').style.display = 'none';
+    }
+
+    function xpathGet(doc, path) {
+      try {
+        const r = doc.evaluate(path, doc, (prefix) => {
+          if (prefix === 'nfse') return 'http://www.sped.fazenda.gov.br/nfse';
+          return null;
+        }, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+        return r.singleNodeValue ? r.singleNodeValue.textContent.trim() : '';
+      } catch { return ''; }
+    }
+
+    function parseXML(xmlText) {
+      const doc = new DOMParser().parseFromString(xmlText, 'application/xml');
+      const g = (p) => xpathGet(doc, p);
+      return {
+        numero:        g('//nfse:infNFSe/nfse:nNFSe'),
+        emissao:       g('//nfse:infNFSe/nfse:dhProc'),
+        prestador:     g('//nfse:emit/nfse:xNome'),
+        prestadorCnpj: g('//nfse:emit/nfse:CNPJ'),
+        tomador:       g('//nfse:toma/nfse:xNome'),
+        tomadorCnpj:   g('//nfse:toma/nfse:CNPJ'),
+        descricao:     g('//nfse:xDescServ'),
+        valorServico:  g('//nfse:vServ'),
+        valorIss:      g('//nfse:vISSQN'),
+        valorLiquido:  g('//nfse:vLiq'),
+      };
+    }
+
+    function gerarPDF(data, nomeArquivo) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ format: 'a4', unit: 'mm' });
+      const L = 20, W = 170;
+      let y = 22;
+
+      const br = (n = 4) => { y += n; };
+
+      const text = (txt, size = 11, bold = false, color = [30, 30, 30]) => {
+        doc.setFontSize(size);
+        doc.setFont('helvetica', bold ? 'bold' : 'normal');
+        doc.setTextColor(...color);
+        const lines = doc.splitTextToSize(String(txt || '—'), W);
+        doc.text(lines, L, y);
+        y += lines.length * (size * 0.42) + 2;
+      };
+
+      const field = (label, value) => {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(80, 80, 80);
+        doc.text(label, L, y);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(20, 20, 20);
+        const lines = doc.splitTextToSize(String(value || '—'), W - 40);
+        doc.text(lines, L + 38, y);
+        y += Math.max(lines.length, 1) * 5 + 1;
+      };
+
+      const section = (title) => {
+        br(3);
+        doc.setFillColor(230, 237, 248);
+        doc.rect(L - 2, y - 4, W + 4, 8, 'F');
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(26, 63, 170);
+        doc.text(title.toUpperCase(), L, y);
+        y += 7;
+      };
+
+      const divider = () => {
+        doc.setDrawColor(210, 210, 210);
+        doc.setLineWidth(0.3);
+        doc.line(L, y, L + W, y);
+        br(4);
+      };
+
+      text('DANFS-e — Documento Auxiliar da Nota Fiscal de Serviço Eletrônica', 14, true, [26, 63, 170]);
+      br(2);
+      divider();
+
+      field('Número NFS-e:', data.numero);
+      field('Data de emissão:', data.emissao);
+
+      section('Prestador de Serviços');
+      field('Razão Social:', data.prestador);
+      field('CNPJ:', data.prestadorCnpj);
+
+      section('Tomador de Serviços');
+      field('Razão Social:', data.tomador);
+      field('CNPJ:', data.tomadorCnpj);
+
+      section('Descrição do Serviço');
+      br(2);
+      text(data.descricao, 10, false, [30, 30, 30]);
+
+      section('Valores');
+      field('Valor do Serviço:', `R$ ${data.valorServico}`);
+      field('ISSQN:', `R$ ${data.valorIss}`);
+      br(2);
+      doc.setFillColor(230, 244, 236);
+      doc.rect(L - 2, y - 3, W + 4, 9, 'F');
+      field('Valor Líquido:', `R$ ${data.valorLiquido}`);
+
+      br(6);
+      divider();
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'italic');
+      doc.setTextColor(150, 150, 150);
+      doc.text('Documento gerado automaticamente a partir do arquivo XML da NFS-e.', L, y);
+
+      doc.save(nomeArquivo);
+    }
+
+    async function convertAll() {
+      const btn = document.getElementById('btn-convert');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="ti ti-loader"></i> Convertendo...';
+
+      for (let i = 0; i < files.length; i++) {
+        const statusEl = document.getElementById('status-' + i);
+        statusEl.textContent = 'processando...';
+        statusEl.className = 'status';
+        try {
+          const text = await files[i].text();
+          const data = parseXML(text);
+          const nomePdf = files[i].name.replace(/\.xml$/i, '') + '.pdf';
+          gerarPDF(data, nomePdf);
+          statusEl.textContent = '✓ baixado';
+          statusEl.className = 'status ok';
+        } catch (e) {
+          statusEl.textContent = '✗ erro';
+          statusEl.className = 'status err';
+          console.error(files[i].name, e);
+        }
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-file-download"></i> Gerar PDFs';
+    }
+  </script>
+</body>
+</html>
