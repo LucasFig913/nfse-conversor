@@ -1,239 +1,379 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Conversor NFS-e · XML → PDF</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background: #080808; color: #e8e8e8;
-      font-family: 'Courier New', monospace;
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; padding: 3rem 1rem;
-    }
-    .container { width: 100%; max-width: 560px; }
-    .hero { text-align: center; margin-bottom: 2.5rem; }
-    .badge {
-      display: inline-block; background: #0d2b1a; color: #22c55e;
-      font-size: 10px; letter-spacing: 0.14em; padding: 4px 14px;
-      border-radius: 100px; border: 1px solid #166534; margin-bottom: 1.25rem;
-    }
-    .hero h1 {
-      font-family: system-ui, -apple-system, sans-serif;
-      font-size: 2.25rem; font-weight: 800; letter-spacing: -0.04em;
-      color: #fff; line-height: 1; margin-bottom: 6px;
-    }
-    .hero h1 span { color: #22c55e; }
-    .hero p { font-size: 10px; color: #333; letter-spacing: 0.1em; }
-    .card { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 16px; padding: 2rem; }
-    .drop {
-      border: 1px dashed #222; border-radius: 12px; padding: 2.5rem 1.5rem;
-      text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s;
-    }
-    .drop:hover, .drop.over { border-color: #22c55e; background: #0a1a0e; }
-    .drop-icon { font-size: 2.25rem; color: #252525; display: block; margin-bottom: 1rem; transition: color 0.2s; }
-    .drop:hover .drop-icon, .drop.over .drop-icon { color: #22c55e; }
-    .drop-label { font-family: system-ui, sans-serif; font-size: 14px; font-weight: 600; color: #aaa; margin-bottom: 4px; }
-    .drop-sub { font-size: 11px; color: #333; }
-    #file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
-    .file-row {
-      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
-      background: #141414; border-radius: 8px; border: 1px solid #1e1e1e;
-      animation: fadeIn 0.2s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-    .file-row i { font-size: 16px; color: #2a2a2a; flex-shrink: 0; }
-    .fname { flex: 1; font-size: 11px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .fstatus { font-size: 11px; color: #2a2a2a; flex-shrink: 0; letter-spacing: 0.04em; }
-    .fstatus.ok   { color: #22c55e; }
-    .fstatus.err  { color: #ef4444; }
-    .fstatus.proc { color: #f59e0b; }
-    .divider { height: 1px; background: #161616; margin: 1.5rem 0; }
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-    .btn-primary {
-      display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px;
-      border-radius: 8px; border: none; background: #22c55e; color: #000;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      font-family: system-ui, sans-serif; letter-spacing: -0.01em;
-      transition: background 0.15s, transform 0.1s;
-    }
-    .btn-primary:hover { background: #16a34a; }
-    .btn-primary:active { transform: scale(0.97); }
-    .btn-primary:disabled { background: #0d2b1a; color: #1a4d2a; cursor: not-allowed; }
-    .btn-ghost {
-      display: inline-flex; align-items: center; gap: 7px; padding: 10px 20px;
-      border-radius: 8px; border: 1px solid #1e1e1e; background: transparent; color: #444;
-      font-size: 13px; cursor: pointer; font-family: system-ui, sans-serif;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .btn-ghost:hover { border-color: #333; color: #888; }
-    footer { text-align: center; margin-top: 1.5rem; font-size: 10px; color: #1e1e1e; letter-spacing: 0.1em; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NFS-e Suite</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧾</text></svg>">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:       #070709;
+  --surface:  #0f0f12;
+  --surface2: #151518;
+  --surface3: #1c1c20;
+  --border:   #222226;
+  --border2:  #2e2e34;
+  --accent:   #22c55e;
+  --accent2:  #16a34a;
+  --accent-dim:#0d2b1a;
+  --accent-glow:rgba(34,197,94,0.15);
+  --text:     #e8e8ec;
+  --text2:    #888892;
+  --text3:    #444450;
+  --danger:   #ef4444;
+  --warn:     #f59e0b;
+  --info:     #3b82f6;
+  --r:        12px;
+  --r-sm:     7px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:2.5rem 1rem 5rem}
+.app{width:100%;max-width:700px}
+
+/* ── HEADER ── */
+.header{text-align:center;margin-bottom:2rem}
+.header-badge{display:inline-flex;align-items:center;gap:6px;background:var(--accent-dim);color:var(--accent);font-size:10px;letter-spacing:.14em;padding:4px 14px;border-radius:100px;border:1px solid #166534;margin-bottom:1rem}
+.header h1{font-family:system-ui,sans-serif;font-size:2rem;font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1;margin-bottom:4px}
+.header h1 span{color:var(--accent)}
+.header p{font-size:10px;color:var(--text3);letter-spacing:.1em}
+
+/* ── NAV ── */
+.nav{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px;margin-bottom:1.5rem;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 11px;border-radius:var(--r-sm);border:none;background:transparent;color:var(--text2);font-size:11px;font-family:'Courier New',monospace;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.nav-btn i{font-size:14px}
+.nav-btn:hover{background:var(--surface3);color:var(--text)}
+.nav-btn.active{background:var(--accent);color:#000;font-weight:700}
+
+/* ── CARD ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem}
+
+/* ── PANELS ── */
+.panel{display:none}
+.panel.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── DROP ZONE ── */
+.drop{border:1px dashed var(--border2);border-radius:var(--r);padding:2.25rem 1.5rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.drop:hover,.drop.over{border-color:var(--accent);background:rgba(34,197,94,.04)}
+.drop-icon{font-size:2rem;color:var(--text3);display:block;margin-bottom:.75rem;transition:color .2s}
+.drop:hover .drop-icon,.drop.over .drop-icon{color:var(--accent)}
+.drop-label{font-family:system-ui,sans-serif;font-size:13px;font-weight:600;color:#aaa;margin-bottom:3px}
+.drop-sub{font-size:11px;color:var(--text3)}
+
+/* ── FILE LIST ── */
+.file-list{margin-top:10px;display:flex;flex-direction:column;gap:5px}
+.file-row{display:flex;align-items:center;gap:10px;padding:9px 13px;background:var(--surface2);border-radius:var(--r-sm);border:1px solid var(--border);animation:fadeUp .2s ease}
+.file-row i{font-size:15px;color:var(--text3);flex-shrink:0}
+.fname{flex:1;font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fstatus{font-size:11px;color:var(--text3);flex-shrink:0;letter-spacing:.04em}
+.fstatus.ok{color:var(--accent)}.fstatus.err{color:var(--danger)}.fstatus.proc{color:var(--warn)}
+
+/* ── DIVIDER ── */
+.divider{height:1px;background:var(--border);margin:1.25rem 0}
+
+/* ── ACTIONS ── */
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--r-sm);font-size:12px;font-family:'Courier New',monospace;cursor:pointer;transition:all .15s;border:1px solid var(--border2)}
+.btn-primary{background:var(--accent);color:#000;font-weight:700;border-color:var(--accent)}
+.btn-primary:hover{background:var(--accent2)}
+.btn-primary:active{transform:scale(.97)}
+.btn-primary:disabled{background:var(--accent-dim);color:#1a4d2a;cursor:not-allowed;border-color:var(--accent-dim)}
+.btn-ghost{background:transparent;color:var(--text2)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text);background:var(--surface3)}
+.btn-info{background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.3)}
+.btn-info:hover{background:rgba(59,130,246,.2)}
+
+/* ── SECTION TITLE ── */
+.sec-title{font-family:system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--text3);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:1.25rem}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:1rem}
+.stat-label{font-size:10px;color:var(--text3);letter-spacing:.06em;margin-bottom:6px}
+.stat-value{font-family:system-ui,sans-serif;font-size:1.3rem;font-weight:700;color:var(--text)}
+.stat-value.green{color:var(--accent)}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto;border-radius:var(--r-sm);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:11px}
+thead tr{background:var(--surface3)}
+th{padding:8px 10px;text-align:left;font-size:10px;letter-spacing:.07em;color:var(--text3);font-weight:700;border-bottom:1px solid var(--border)}
+td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface3);color:var(--text)}
+.td-mono{font-family:'Courier New',monospace;font-size:10px}
+.td-green{color:var(--accent);font-weight:700}
+.td-warn{color:var(--warn)}
+
+/* ── BADGE ── */
+.badge{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700}
+.badge-green{background:var(--accent-dim);color:var(--accent);border:1px solid #166534}
+.badge-warn{background:rgba(245,158,11,.1);color:var(--warn);border:1px solid rgba(245,158,11,.3)}
+.badge-danger{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+
+/* ── CHART ── */
+.chart-wrap{position:relative;height:220px;margin-bottom:1.25rem}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--text3)}
+.empty i{font-size:2rem;display:block;margin-bottom:.75rem}
+.empty p{font-size:12px;line-height:1.6}
+
+/* ── ALERT ── */
+.alert{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:var(--r-sm);font-size:11px;line-height:1.5;margin-bottom:10px}
+.alert-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:var(--warn)}
+.alert-danger{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.25);color:var(--danger)}
+.alert-ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);color:var(--accent)}
+.alert i{flex-shrink:0;font-size:15px;margin-top:1px}
+
+/* ── TRIB BARS ── */
+.trib-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.trib-label{width:80px;font-size:11px;color:var(--text2);flex-shrink:0}
+.trib-bar-bg{flex:1;height:8px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.trib-bar{height:8px;border-radius:4px;transition:width .6s ease}
+.trib-pct{width:46px;font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
+
+/* ── SIMUL ── */
+.simul-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem}
+.simul-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);padding:1rem}
+.simul-card.highlight{border-color:var(--accent);background:rgba(34,197,94,.04)}
+.simul-card-title{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:.5rem;display:flex;align-items:center;gap:6px}
+.simul-val{font-family:system-ui,sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent)}
+.simul-detail{font-size:10px;color:var(--text3);margin-top:4px;line-height:1.6}
+
+footer{text-align:center;margin-top:2rem;font-size:10px;color:var(--text3);letter-spacing:.08em}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="hero">
-      <div class="badge">⬡ NFS-e · SPED · fazenda.gov.br</div>
-      <h1>XML <span>→</span> PDF</h1>
-      <p>PROCESSAMENTO 100% LOCAL · NENHUM DADO ENVIADO</p>
-    </div>
-    <div class="card">
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-badge"><i class="ti ti-receipt" aria-hidden="true"></i> NFS-e · SPED · fazenda.gov.br</div>
+    <h1>NFS-e <span>Suite</span></h1>
+    <p>PROCESSAMENTO 100% LOCAL · NENHUM DADO ENVIADO</p>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav" role="tablist" aria-label="Módulos">
+    <button class="nav-btn active" onclick="setTab('conversor')" data-tab="conversor" role="tab"><i class="ti ti-file-download"></i> Conversor</button>
+    <button class="nav-btn" onclick="setTab('dashboard')" data-tab="dashboard" role="tab"><i class="ti ti-chart-line"></i> Dashboard</button>
+    <button class="nav-btn" onclick="setTab('tributos')" data-tab="tributos" role="tab"><i class="ti ti-chart-pie"></i> Tributos</button>
+    <button class="nav-btn" onclick="setTab('tomadores')" data-tab="tomadores" role="tab"><i class="ti ti-building"></i> Tomadores</button>
+    <button class="nav-btn" onclick="setTab('exportar')" data-tab="exportar" role="tab"><i class="ti ti-table-export"></i> Exportar</button>
+    <button class="nav-btn" onclick="setTab('validacao')" data-tab="validacao" role="tab"><i class="ti ti-shield-check"></i> Validação</button>
+    <button class="nav-btn" onclick="setTab('historico')" data-tab="historico" role="tab"><i class="ti ti-history"></i> Histórico</button>
+    <button class="nav-btn" onclick="setTab('simulador')" data-tab="simulador" role="tab"><i class="ti ti-calculator"></i> Simulador</button>
+  </nav>
+
+  <!-- CARD WRAPPER -->
+  <div class="card">
+
+    <!-- ═══════════════════════════════ CONVERSOR ═══════════════════════════════ -->
+    <div class="panel active" id="panel-conversor">
       <div class="drop" id="drop"
         onclick="document.getElementById('fi').click()"
-        ondragover="event.preventDefault(); this.classList.add('over')"
+        ondragover="event.preventDefault();this.classList.add('over')"
         ondragleave="this.classList.remove('over')"
         ondrop="onDrop(event)">
         <i class="ti ti-file-arrow-up drop-icon" aria-hidden="true"></i>
         <p class="drop-label">Arraste seus XMLs aqui ou clique para selecionar</p>
-        <p class="drop-sub">múltiplos arquivos · padrão NFS-e</p>
+        <p class="drop-sub">múltiplos arquivos · padrão NFS-e SPED</p>
         <input type="file" id="fi" accept=".xml" multiple style="display:none" onchange="addFiles(Array.from(this.files))">
       </div>
-      <div id="file-list"></div>
-      <div id="actions" style="display:none">
+      <div class="file-list" id="file-list"></div>
+      <div id="conv-actions" style="display:none">
         <div class="divider"></div>
         <div class="actions">
-          <button class="btn-primary" id="btn-convert" onclick="convertAll()">
-            <i class="ti ti-download" aria-hidden="true"></i> Gerar PDFs
-          </button>
-          <button class="btn-ghost" onclick="clearAll()">
-            <i class="ti ti-trash" aria-hidden="true"></i> Limpar
-          </button>
+          <button class="btn btn-primary" id="btn-convert" onclick="convertAll()"><i class="ti ti-download"></i> Gerar PDFs</button>
+          <button class="btn btn-ghost" onclick="clearAll()"><i class="ti ti-trash"></i> Limpar</button>
         </div>
       </div>
     </div>
-    <footer>CONVERSOR CLIENT-SIDE · SEM SERVIDOR · SEM COOKIES</footer>
-  </div>
+
+    <!-- ═══════════════════════════════ DASHBOARD ═══════════════════════════════ -->
+    <div class="panel" id="panel-dashboard">
+      <div id="dash-empty" class="empty"><i class="ti ti-chart-line"></i><p>Carregue XMLs na aba <b>Conversor</b><br>para visualizar o dashboard de faturamento.</p></div>
+      <div id="dash-content" style="display:none">
+        <div class="stat-grid" id="dash-stats"></div>
+        <div class="sec-title">Faturamento mensal</div>
+        <div class="chart-wrap"><canvas id="chart-faturamento"></canvas></div>
+        <div class="sec-title">Evolução do valor líquido</div>
+        <div class="chart-wrap"><canvas id="chart-liquido"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ TRIBUTOS ═══════════════════════════════ -->
+    <div class="panel" id="panel-tributos">
+      <div id="trib-empty" class="empty"><i class="ti ti-chart-pie"></i><p>Carregue XMLs na aba <b>Conversor</b><br>para analisar a carga tributária.</p></div>
+      <div id="trib-content" style="display:none">
+        <div class="stat-grid" id="trib-stats"></div>
+        <div class="sec-title">Distribuição por tipo</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+          <div class="chart-wrap" style="height:180px"><canvas id="chart-tribpie"></canvas></div>
+          <div id="trib-bars" style="padding-top:.5rem"></div>
+        </div>
+        <div class="sec-title">Tributos por competência</div>
+        <div class="chart-wrap"><canvas id="chart-tribmensal"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ TOMADORES ═══════════════════════════════ -->
+    <div class="panel" id="panel-tomadores">
+      <div id="toma-empty" class="empty"><i class="ti ti-building"></i><p>Carregue XMLs na aba <b>Conversor</b><br>para visualizar o relatório de tomadores.</p></div>
+      <div id="toma-content" style="display:none">
+        <div class="stat-grid" id="toma-stats"></div>
+        <div class="sec-title">Ranking por volume</div>
+        <div class="chart-wrap"><canvas id="chart-tomadores"></canvas></div>
+        <div class="sec-title">Detalhamento</div>
+        <div class="tbl-wrap"><table id="tbl-tomadores">
+          <thead><tr><th>Tomador</th><th>CNPJ</th><th>Notas</th><th>Total</th><th>Part. %</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ EXPORTAR ═══════════════════════════════ -->
+    <div class="panel" id="panel-exportar">
+      <div id="exp-empty" class="empty"><i class="ti ti-table-export"></i><p>Carregue XMLs na aba <b>Conversor</b><br>para exportar os dados para planilha.</p></div>
+      <div id="exp-content" style="display:none">
+        <div class="sec-title">Exportação para planilha</div>
+        <div class="stat-grid" id="exp-stats"></div>
+        <div class="divider"></div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:1rem;line-height:1.7">
+          Gera um arquivo <b style="color:var(--text)">.xlsx</b> com todas as notas carregadas em uma única planilha — uma linha por nota, com todos os campos principais. Ideal para entregar ao contador ou importar em sistemas ERP.
+        </p>
+        <div class="actions">
+          <button class="btn btn-info" onclick="exportXLSX()"><i class="ti ti-file-spreadsheet"></i> Baixar planilha XLSX</button>
+        </div>
+        <div class="divider"></div>
+        <div class="sec-title">Prévia dos dados</div>
+        <div class="tbl-wrap"><table id="tbl-export">
+          <thead><tr><th>#</th><th>NFS-e</th><th>Competência</th><th>Prestador</th><th>Tomador</th><th>Valor Serviço</th><th>Valor Líquido</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ VALIDAÇÃO ═══════════════════════════════ -->
+    <div class="panel" id="panel-validacao">
+      <div id="val-empty" class="empty"><i class="ti ti-shield-check"></i><p>Carregue XMLs na aba <b>Conversor</b><br>para executar a validação fiscal automática.</p></div>
+      <div id="val-content" style="display:none">
+        <div class="stat-grid" id="val-stats"></div>
+        <div class="sec-title">Resultados por nota</div>
+        <div id="val-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ HISTÓRICO ═══════════════════════════════ -->
+    <div class="panel" id="panel-historico">
+      <div class="sec-title">Notas carregadas na sessão</div>
+      <div id="hist-empty" class="empty" style="padding:1.5rem"><i class="ti ti-history"></i><p>Nenhuma nota carregada ainda.<br>Vá para <b>Conversor</b> e adicione XMLs.</p></div>
+      <div id="hist-content" style="display:none">
+        <div class="tbl-wrap"><table id="tbl-historico">
+          <thead><tr><th>NFS-e</th><th>Emissão</th><th>Prestador</th><th>Tomador</th><th>Valor Líquido</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+        <div class="divider"></div>
+        <button class="btn btn-ghost" onclick="clearAll()"><i class="ti ti-trash"></i> Limpar histórico</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════ SIMULADOR ═══════════════════════════════ -->
+    <div class="panel" id="panel-simulador">
+      <div class="sec-title">Simulador de regime tributário</div>
+      <p style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:1.25rem">
+        Compare quanto você pagaria de tributos no <b style="color:var(--text)">Simples Nacional</b>, <b style="color:var(--text)">Lucro Presumido</b> e <b style="color:var(--text)">Lucro Real</b> com base no faturamento anual projetado. Se XMLs foram carregados, o valor é preenchido automaticamente.
+      </p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem">
+        <div>
+          <label style="font-size:10px;color:var(--text3);letter-spacing:.07em;display:block;margin-bottom:6px">FATURAMENTO ANUAL (R$)</label>
+          <input type="number" id="simul-fat" placeholder="180000" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);padding:9px 12px;font-family:'Courier New',monospace;font-size:13px" oninput="calcSimul()">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);letter-spacing:.07em;display:block;margin-bottom:6px">ATIVIDADE PRINCIPAL</label>
+          <select id="simul-ativ" style="width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r-sm);color:var(--text);padding:9px 12px;font-family:'Courier New',monospace;font-size:12px" onchange="calcSimul()">
+            <option value="servicos_tec">Serviços de TI / digitação</option>
+            <option value="servicos_prof">Serviços profissionais</option>
+            <option value="comercio">Comércio</option>
+          </select>
+        </div>
+      </div>
+      <div id="simul-result"></div>
+      <div class="divider"></div>
+      <div class="sec-title">Comparativo visual</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="chart-simul"></canvas></div>
+      <p style="font-size:10px;color:var(--text3);margin-top:.75rem;line-height:1.6">⚠️ Valores estimados com base em alíquotas médias de 2024. Consulte um contador para decisões formais.</p>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /app -->
+
+<footer>NFS-e SUITE · PROCESSAMENTO LOCAL · SEM SERVIDOR · SEM COOKIES</footer>
 
 <script>
-let files = [];
+// ══════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════
+let allNotes = []; // parsed notes
+let rawFiles = []; // File objects
+let charts   = {}; // chart instances
 
-function onDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop').classList.remove('over');
-  addFiles(Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.xml')));
-}
-function addFiles(newFiles) {
-  newFiles.forEach(f => { if (!files.find(x => x.name === f.name)) files.push(f); });
-  render();
-}
-function render() {
-  const list = document.getElementById('file-list');
-  list.innerHTML = '';
-  files.forEach((f, i) => {
-    const row = document.createElement('div');
-    row.className = 'file-row';
-    row.innerHTML = `<i class="ti ti-file-text" aria-hidden="true"></i><span class="fname">${f.name}</span><span class="fstatus" id="s${i}">—</span>`;
-    list.appendChild(row);
-  });
-  document.getElementById('actions').style.display = files.length ? 'block' : 'none';
-}
-function clearAll() {
-  files = [];
-  document.getElementById('file-list').innerHTML = '';
-  document.getElementById('actions').style.display = 'none';
+// ══════════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════════
+function setTab(id) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + id));
+  if (id !== 'conversor' && allNotes.length > 0) refreshTab(id);
 }
 
-// ── XML helpers ──────────────────────────────────────────────
+function refreshTab(id) {
+  if (id === 'dashboard')  buildDashboard();
+  if (id === 'tributos')   buildTributos();
+  if (id === 'tomadores')  buildTomadores();
+  if (id === 'exportar')   buildExportar();
+  if (id === 'validacao')  buildValidacao();
+  if (id === 'historico')  buildHistorico();
+  if (id === 'simulador')  buildSimulador();
+}
+
+// ══════════════════════════════════════════════════
+//  XML PARSING
+// ══════════════════════════════════════════════════
 function xget(doc, path) {
   try {
-    const r = doc.evaluate(path, doc,
-      p => p === 'n' ? 'http://www.sped.fazenda.gov.br/nfse' : null,
-      XPathResult.FIRST_ORDERED_NODE_TYPE, null);
+    const r = doc.evaluate(path, doc, p => p === 'n' ? 'http://www.sped.fazenda.gov.br/nfse' : null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
     return r.singleNodeValue ? r.singleNodeValue.textContent.trim() : '';
   } catch { return ''; }
-}
-
-function formatCNPJ(v) {
-  v = v.replace(/\D/g,'');
-  if (v.length === 14) return v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5');
-  if (v.length === 11) return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
-  return v;
-}
-function formatCEP(v) {
-  v = v.replace(/\D/g,'');
-  return v.length===8 ? v.replace(/(\d{5})(\d{3})/,'$1-$2') : v;
-}
-function formatFone(v) {
-  v = v.replace(/\D/g,'');
-  if (v.length===11) return `(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-  if (v.length===10) return `(${v.slice(0,2)}) ${v.slice(2,6)}-${v.slice(6)}`;
-  return v;
-}
-function formatData(v) {
-  if (!v) return '';
-  // 2026-05-20T16:28:47-03:00  →  20/05/2026 16:28:02
-  const m = v.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2}:\d{2})/);
-  if (m) return `${m[3]}/${m[2]}/${m[1]} ${m[4]}`;
-  // 2026-05-20 → 20/05/2026
-  const d = v.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if (d) return `${d[3]}/${d[2]}/${d[1]}`;
-  return v;
-}
-function formatValor(v) {
-  if (!v) return '-';
-  const n = parseFloat(v);
-  if (isNaN(n)) return v;
-  return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-}
-
-// Mapa de município por código IBGE (principais PE + outros)
-const MUNICIPIOS = {
-  '2611606':'Recife - PE','2607901':'Jaboatão dos Guararapes - PE',
-  '2604106':'Caruaru - PE','2609600':'Olinda - PE','2615003':'Serra Talhada - PE',
-  '3550308':'São Paulo - SP','3304557':'Rio de Janeiro - RJ','5300108':'Brasília - DF',
-};
-function nomeMun(cod) { return MUNICIPIOS[cod] || cod; }
-
-function opSimpNacLabel(v) {
-  const m = {'1':'Não optante','2':'Optante - MEI','3':'Optante - Microempresa ou Empresa de Pequeno Porte (ME/EPP)','4':'Optante - Demais'};
-  return m[v] || v;
-}
-function regApTribSNLabel(v) {
-  const m = {'1':'Regime de apuração dos tributos federais e municipal pelo Simples Nacional','2':'Regime de apuração dos tributos federais pelo Simples Nacional, com tributação municipal fora do Simples Nacional','3':'Regime de apuração dos tributos municipais pelo Simples Nacional, com tributação federal fora do Simples Nacional'};
-  return m[v] || v;
-}
-function tribISSQNLabel(v) {
-  const m = {'1':'Operação Tributável','2':'Operação Isenta','3':'Operação Imune','4':'Operação Suspensa','5':'Exportação de Serviços'};
-  return m[v] || v;
-}
-function retISSQNLabel(v) {
-  const m = {'1':'Não Retido','2':'Retido pelo Tomador','3':'Retido pelo Intermediário'};
-  return m[v] || v;
-}
-function regEspTribLabel(v) {
-  const m = {'0':'Nenhum','1':'Microempresa Municipal','2':'Estimativa','3':'Sociedade de Profissionais','4':'Cooperativa','5':'Microempresário Individual (MEI)','6':'Microempresário e Empresa de Pequeno Porte (ME EPP)'};
-  return m[v] || v;
 }
 
 function parseXML(txt) {
   const doc = new DOMParser().parseFromString(txt, 'application/xml');
   const g = p => xget(doc, p);
-
-  // Chave de acesso = Id do infNFSe sem o prefixo "NFS"
   const infId = g('//n:infNFSe/@Id') || g('//@Id');
-  const chave = infId.replace(/^NFS/,'');
-
   return {
-    chave,
-    nNFSe:          g('//n:infNFSe/n:nNFSe'),
-    dhProc:         g('//n:infNFSe/n:dhProc'),
-    nDFSe:          g('//n:infNFSe/n:nDFSe'),
-    xLocEmi:        g('//n:infNFSe/n:xLocEmi'),
-    xLocPrestacao:  g('//n:infNFSe/n:xLocPrestacao'),
-    xLocIncid:      g('//n:infNFSe/n:xLocIncid'),
-    cLocIncid:      g('//n:infNFSe/n:cLocIncid'),
-
-    // DPS
-    nDPS:    g('//n:infDPS/n:nDPS'),
-    serie:   g('//n:infDPS/n:serie'),
-    dhEmi:   g('//n:infDPS/n:dhEmi'),
-    dCompet: g('//n:infDPS/n:dCompet'),
-
-    // Prestador
+    chave:       infId.replace(/^NFS/, ''),
+    nNFSe:       g('//n:infNFSe/n:nNFSe'),
+    dhProc:      g('//n:infNFSe/n:dhProc'),
+    nDFSe:       g('//n:infNFSe/n:nDFSe'),
+    xLocEmi:     g('//n:infNFSe/n:xLocEmi'),
+    xLocIncid:   g('//n:infNFSe/n:xLocIncid'),
+    cLocIncid:   g('//n:infNFSe/n:cLocIncid'),
+    nDPS:        g('//n:infDPS/n:nDPS'),
+    serie:       g('//n:infDPS/n:serie'),
+    dhEmi:       g('//n:infDPS/n:dhEmi'),
+    dCompet:     g('//n:infDPS/n:dCompet'),
     emitCNPJ:    g('//n:infNFSe/n:emit/n:CNPJ'),
     emitIM:      g('//n:infNFSe/n:emit/n:IM'),
     emitNome:    g('//n:infNFSe/n:emit/n:xNome'),
@@ -249,373 +389,628 @@ function parseXML(txt) {
     opSimpNac:   g('//n:regTrib/n:opSimpNac'),
     regApTribSN: g('//n:regTrib/n:regApTribSN'),
     regEspTrib:  g('//n:regTrib/n:regEspTrib'),
-
-    // Tomador
-    tomaCNPJ:   g('//n:toma/n:CNPJ'),
-    tomaIM:     g('//n:toma/n:IM'),
-    tomaNome:   g('//n:toma/n:xNome'),
-    tomaFone:   g('//n:toma/n:fone'),
-    tomaEmail:  g('//n:toma/n:email'),
-    tomaLgr:    g('//n:toma/n:end/n:xLgr'),
-    tomaNro:    g('//n:toma/n:end/n:nro'),
-    tomaCpl:    g('//n:toma/n:end/n:xCpl'),
-    tomaBairro: g('//n:toma/n:end/n:xBairro'),
-    tomaCMun:   g('//n:toma/n:end/n:endNac/n:cMun'),
-    tomaCEP:    g('//n:toma/n:end/n:endNac/n:CEP'),
-
-    // Serviço
-    cTribNac:   g('//n:cServ/n:cTribNac'),
-    xTribNac:   g('//n:infNFSe/n:xTribNac'),
-    cTribMun:   g('//n:cServ/n:cTribMun'),
-    xTribMun:   g('//n:infNFSe/n:xTribMun'),
-    cLocPrest:  g('//n:locPrest/n:cLocPrestacao'),
-    xDescServ:  g('//n:cServ/n:xDescServ'),
-    cNBS:       g('//n:cServ/n:cNBS'),
-    xNBS:       g('//n:infNFSe/n:xNBS'),
-
-    // Tributação municipal
-    tribISSQN:  g('//n:tribMun/n:tribISSQN'),
-    tpRetISSQN: g('//n:tribMun/n:tpRetISSQN'),
-
-    // Valores
-    vServ:    g('//n:vServPrest/n:vServ'),
-    vLiq:     g('//n:infNFSe/n:valores/n:vLiq'),
-
-    // Tributos aproximados
+    tomaCNPJ:    g('//n:toma/n:CNPJ'),
+    tomaIM:      g('//n:toma/n:IM'),
+    tomaNome:    g('//n:toma/n:xNome'),
+    tomaFone:    g('//n:toma/n:fone'),
+    tomaEmail:   g('//n:toma/n:email'),
+    tomaLgr:     g('//n:toma/n:end/n:xLgr'),
+    tomaNro:     g('//n:toma/n:end/n:nro'),
+    tomaCpl:     g('//n:toma/n:end/n:xCpl'),
+    tomaBairro:  g('//n:toma/n:end/n:xBairro'),
+    tomaCMun:    g('//n:toma/n:end/n:endNac/n:cMun'),
+    tomaCEP:     g('//n:toma/n:end/n:endNac/n:CEP'),
+    cTribNac:    g('//n:cServ/n:cTribNac'),
+    xTribNac:    g('//n:infNFSe/n:xTribNac'),
+    cTribMun:    g('//n:cServ/n:cTribMun'),
+    xTribMun:    g('//n:infNFSe/n:xTribMun'),
+    cLocPrest:   g('//n:locPrest/n:cLocPrestacao'),
+    xDescServ:   g('//n:cServ/n:xDescServ'),
+    cNBS:        g('//n:cServ/n:cNBS'),
+    xNBS:        g('//n:infNFSe/n:xNBS'),
+    tribISSQN:   g('//n:tribMun/n:tribISSQN'),
+    tpRetISSQN:  g('//n:tribMun/n:tpRetISSQN'),
+    vServ:       g('//n:vServPrest/n:vServ'),
+    vLiq:        g('//n:infNFSe/n:valores/n:vLiq'),
     pTotTribFed: g('//n:pTotTrib/n:pTotTribFed'),
     pTotTribEst: g('//n:pTotTrib/n:pTotTribEst'),
     pTotTribMun: g('//n:pTotTrib/n:pTotTribMun'),
+    cStat:       g('//n:infNFSe/n:cStat'),
   };
 }
 
-// ── PDF generator ─────────────────────────────────────────────
-function gerarPDF(d, nome) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ format: 'a4', unit: 'mm' });
-  const PW = 210, PH = 297;
-  const ML = 10, MR = 10, TW = PW - ML - MR; // margins & total width
-  let y = 0;
+// ══════════════════════════════════════════════════
+//  FILE MANAGEMENT
+// ══════════════════════════════════════════════════
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop').classList.remove('over');
+  addFiles(Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.xml')));
+}
 
-  // ── color helpers
-  const setFill  = (r,g,b) => doc.setFillColor(r,g,b);
-  const setStroke= (r,g,b) => doc.setDrawColor(r,g,b);
-  const setTxt   = (r,g,b) => doc.setTextColor(r,g,b);
-  const WHITE=[255,255,255], BLACK=[0,0,0], GRAY=[100,100,100];
-  const NAVY=[30,60,120], NAVY_LIGHT=[220,228,245];
-  const GREEN_DARK=[0,100,60], GREEN_LIGHT=[220,245,232];
-
-  // ── text helper
-  function txt(text, x, yy, opts={}) {
-    const {size=9, bold=false, color=BLACK, align='left', maxW=null} = opts;
-    doc.setFontSize(size);
-    doc.setFont('helvetica', bold?'bold':'normal');
-    doc.setTextColor(...color);
-    if (maxW) {
-      const lines = doc.splitTextToSize(String(text||''), maxW);
-      doc.text(lines, x, yy, {align});
-      return lines.length * (size * 0.38);
+async function addFiles(newFiles) {
+  for (const f of newFiles) {
+    if (rawFiles.find(x => x.name === f.name)) continue;
+    rawFiles.push(f);
+    const idx = rawFiles.length - 1;
+    renderFileRow(f, idx, 'lendo...');
+    try {
+      const txt = await f.text();
+      const note = parseXML(txt);
+      note._file = f.name;
+      note._idx  = idx;
+      allNotes.push(note);
+      setStatus(idx, 'ok', '✓ lido');
+    } catch(e) {
+      setStatus(idx, 'err', '✗ erro');
     }
-    doc.text(String(text||''), x, yy, {align});
-    return size * 0.38;
+  }
+  document.getElementById('conv-actions').style.display = rawFiles.length ? 'block' : 'none';
+}
+
+function renderFileRow(f, i, statusTxt) {
+  const list = document.getElementById('file-list');
+  const row = document.createElement('div');
+  row.className = 'file-row'; row.id = 'row' + i;
+  row.innerHTML = `<i class="ti ti-file-text" aria-hidden="true"></i><span class="fname">${f.name}</span><span class="fstatus proc" id="s${i}">${statusTxt}</span>`;
+  list.appendChild(row);
+}
+
+function setStatus(i, cls, txt) {
+  const el = document.getElementById('s' + i);
+  if (!el) return;
+  el.className = 'fstatus ' + cls;
+  el.textContent = txt;
+}
+
+function clearAll() {
+  rawFiles = []; allNotes = [];
+  document.getElementById('file-list').innerHTML = '';
+  document.getElementById('conv-actions').style.display = 'none';
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch{} });
+  charts = {};
+}
+
+// ══════════════════════════════════════════════════
+//  FORMATTERS
+// ══════════════════════════════════════════════════
+const fmtCNPJ = v => { v=v.replace(/\D/g,''); return v.length===14?v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'):v.length===11?v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):v; };
+const fmtCEP  = v => { v=v.replace(/\D/g,''); return v.length===8?v.replace(/(\d{5})(\d{3})/,'$1-$2'):v; };
+const fmtFone = v => { v=v.replace(/\D/g,''); return v.length===11?`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`:v.length===10?`(${v.slice(0,2)}) ${v.slice(2,6)}-${v.slice(6)}`:v; };
+const fmtData = v => { if(!v)return''; const m=v.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})/); if(m)return`${m[3]}/${m[2]}/${m[1]} ${m[4]}`; const d=v.match(/(\d{4})-(\d{2})-(\d{2})/); return d?`${d[3]}/${d[2]}/${d[1]}`:v; };
+const fmtMes  = v => { const d=v.match(/(\d{4})-(\d{2})/); return d?`${d[2]}/${d[1]}`:v; };
+const fmtBRL  = v => { const n=parseFloat(v); return isNaN(n)?'-':'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+const fmtNum  = v => parseFloat(v)||0;
+const fmtPct  = v => { const n=parseFloat(v); return isNaN(n)?'0,00 %':n.toLocaleString('pt-BR',{minimumFractionDigits:2})+'%'; };
+
+const MUNICIPIOS = {'2611606':'Recife - PE','2607901':'Jaboatão dos Guararapes - PE','2604106':'Caruaru - PE','2609600':'Olinda - PE','3550308':'São Paulo - SP','3304557':'Rio de Janeiro - RJ','5300108':'Brasília - DF'};
+const nomeMun = cod => MUNICIPIOS[cod] || cod;
+
+// ══════════════════════════════════════════════════
+//  CHART HELPERS
+// ══════════════════════════════════════════════════
+const CHART_DEFAULTS = {
+  color: '#e8e8ec',
+  font: { family: 'Courier New, monospace', size: 10 },
+};
+Chart.defaults.color = CHART_DEFAULTS.color;
+Chart.defaults.font  = CHART_DEFAULTS.font;
+
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function mkLineChart(id, labels, datasets) {
+  destroyChart(id);
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: datasets.map(d => ({
+      ...d, borderWidth:2, pointRadius:4, pointHoverRadius:6,
+      tension:.35, fill:d.fill||false,
+      backgroundColor: d.fill ? d.bgColor||'rgba(34,197,94,.08)' : 'transparent',
+    }))},
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ boxWidth:10, padding:16 } } },
+      scales:{
+        x:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ maxRotation:45 } },
+        y:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks:{ callback: v=>'R$ '+v.toLocaleString('pt-BR') } }
+      }
+    }
+  });
+}
+
+function mkBarChart(id, labels, datasets, opts={}) {
+  destroyChart(id);
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: datasets.map(d=>({...d, borderRadius:4, borderWidth:0})) },
+    options: {
+      responsive:true, maintainAspectRatio:false, indexAxis: opts.horizontal?'y':'x',
+      plugins:{ legend:{ display: datasets.length>1, labels:{ boxWidth:10 } } },
+      scales:{
+        x:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks: opts.horizontal ? {} : { maxRotation:45 } },
+        y:{ grid:{ color:'rgba(255,255,255,.05)' }, ticks: opts.horizontal ? {} : { callback: v=>'R$ '+v.toLocaleString('pt-BR') } }
+      }
+    }
+  });
+}
+
+function mkPieChart(id, labels, data, colors) {
+  destroyChart(id);
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor:colors, borderWidth:2, borderColor:'#0f0f12' }] },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12 } } }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════
+function buildDashboard() {
+  if (!allNotes.length) return;
+  document.getElementById('dash-empty').style.display = 'none';
+  document.getElementById('dash-content').style.display = 'block';
+
+  const total = allNotes.reduce((s,n)=>s+fmtNum(n.vServ),0);
+  const liquido = allNotes.reduce((s,n)=>s+fmtNum(n.vLiq),0);
+
+  // group by month
+  const byMonth = {};
+  allNotes.forEach(n => {
+    const m = (n.dCompet||n.dhProc||'').slice(0,7);
+    if (!byMonth[m]) byMonth[m] = { vServ:0, vLiq:0, count:0 };
+    byMonth[m].vServ += fmtNum(n.vServ);
+    byMonth[m].vLiq  += fmtNum(n.vLiq);
+    byMonth[m].count++;
+  });
+  const months = Object.keys(byMonth).sort();
+  const labels = months.map(fmtMes);
+
+  // stats
+  document.getElementById('dash-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">TOTAL FATURADO</div><div class="stat-value green">${fmtBRL(total)}</div><div class="stat-sub">${allNotes.length} nota(s)</div></div>
+    <div class="stat-card"><div class="stat-label">VALOR LÍQUIDO</div><div class="stat-value">${fmtBRL(liquido)}</div></div>
+    <div class="stat-card"><div class="stat-label">TICKET MÉDIO</div><div class="stat-value">${fmtBRL(total/allNotes.length)}</div></div>
+    <div class="stat-card"><div class="stat-label">COMPETÊNCIAS</div><div class="stat-value">${months.length}</div><div class="stat-sub">mês(es)</div></div>
+  `;
+
+  mkLineChart('chart-faturamento', labels, [{
+    label:'Faturamento Bruto', data:months.map(m=>byMonth[m].vServ),
+    borderColor:'#22c55e', fill:true,
+  }]);
+  mkLineChart('chart-liquido', labels, [{
+    label:'Valor Líquido', data:months.map(m=>byMonth[m].vLiq),
+    borderColor:'#3b82f6', fill:true, bgColor:'rgba(59,130,246,.08)',
+  }]);
+}
+
+// ══════════════════════════════════════════════════
+//  TRIBUTOS
+// ══════════════════════════════════════════════════
+function buildTributos() {
+  if (!allNotes.length) return;
+  document.getElementById('trib-empty').style.display = 'none';
+  document.getElementById('trib-content').style.display = 'block';
+
+  const total = allNotes.reduce((s,n)=>s+fmtNum(n.vServ),0);
+  const avgFed = allNotes.reduce((s,n)=>s+fmtNum(n.pTotTribFed),0)/allNotes.length;
+  const avgMun = allNotes.reduce((s,n)=>s+fmtNum(n.pTotTribMun),0)/allNotes.length;
+  const avgEst = allNotes.reduce((s,n)=>s+fmtNum(n.pTotTribEst),0)/allNotes.length;
+  const avgTotal= avgFed+avgMun+avgEst;
+  const tribTotal= total*(avgTotal/100);
+
+  document.getElementById('trib-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">CARGA TRIBUTÁRIA TOTAL</div><div class="stat-value">${fmtPct(avgTotal)}</div><div class="stat-sub">${fmtBRL(tribTotal)}</div></div>
+    <div class="stat-card"><div class="stat-label">FEDERAIS (média)</div><div class="stat-value">${fmtPct(avgFed)}</div></div>
+    <div class="stat-card"><div class="stat-label">MUNICIPAIS (média)</div><div class="stat-value">${fmtPct(avgMun)}</div></div>
+    <div class="stat-card"><div class="stat-label">ESTADUAIS (média)</div><div class="stat-value">${fmtPct(avgEst)}</div></div>
+  `;
+
+  mkPieChart('chart-tribpie',
+    ['Federais','Municipais','Estaduais','Líquido'],
+    [avgFed, avgMun, avgEst, 100-avgTotal],
+    ['#3b82f6','#22c55e','#f59e0b','#222226']
+  );
+
+  const bars = document.getElementById('trib-bars');
+  bars.innerHTML = '';
+  [['Federais', avgFed,'#3b82f6'],['Municipais', avgMun,'#22c55e'],['Estaduais', avgEst,'#f59e0b']].forEach(([l,v,c])=>{
+    bars.innerHTML += `<div class="trib-row"><span class="trib-label">${l}</span><div class="trib-bar-bg"><div class="trib-bar" style="width:${Math.min(v/20*100,100)}%;background:${c}"></div></div><span class="trib-pct">${fmtPct(v)}</span></div>`;
+  });
+
+  const byMonth={};
+  allNotes.forEach(n=>{
+    const m=(n.dCompet||n.dhProc||'').slice(0,7);
+    if(!byMonth[m])byMonth[m]={fed:0,mun:0,est:0};
+    const vs=fmtNum(n.vServ);
+    byMonth[m].fed+=vs*(fmtNum(n.pTotTribFed)/100);
+    byMonth[m].mun+=vs*(fmtNum(n.pTotTribMun)/100);
+    byMonth[m].est+=vs*(fmtNum(n.pTotTribEst)/100);
+  });
+  const months=Object.keys(byMonth).sort();
+  mkBarChart('chart-tribmensal', months.map(fmtMes), [
+    {label:'Federais',  data:months.map(m=>+byMonth[m].fed.toFixed(2)),  backgroundColor:'#3b82f6'},
+    {label:'Municipais',data:months.map(m=>+byMonth[m].mun.toFixed(2)),  backgroundColor:'#22c55e'},
+    {label:'Estaduais', data:months.map(m=>+byMonth[m].est.toFixed(2)),  backgroundColor:'#f59e0b'},
+  ]);
+}
+
+// ══════════════════════════════════════════════════
+//  TOMADORES
+// ══════════════════════════════════════════════════
+function buildTomadores() {
+  if (!allNotes.length) return;
+  document.getElementById('toma-empty').style.display = 'none';
+  document.getElementById('toma-content').style.display = 'block';
+
+  const map = {};
+  const total = allNotes.reduce((s,n)=>s+fmtNum(n.vServ),0);
+  allNotes.forEach(n=>{
+    const k = n.tomaCNPJ||n.tomaNome||'N/I';
+    if(!map[k])map[k]={nome:n.tomaNome||'N/I',cnpj:n.tomaCNPJ||'-',total:0,count:0};
+    map[k].total+=fmtNum(n.vServ);
+    map[k].count++;
+  });
+  const sorted=Object.values(map).sort((a,b)=>b.total-a.total);
+
+  document.getElementById('toma-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">TOMADORES ÚNICOS</div><div class="stat-value">${sorted.length}</div></div>
+    <div class="stat-card"><div class="stat-label">MAIOR CLIENTE</div><div class="stat-value green" style="font-size:.9rem">${sorted[0]?.nome?.split(' ').slice(0,2).join(' ')||'-'}</div><div class="stat-sub">${fmtBRL(sorted[0]?.total)}</div></div>
+    <div class="stat-card"><div class="stat-label">CONCENTRAÇÃO TOP-1</div><div class="stat-value">${total?((sorted[0]?.total||0)/total*100).toFixed(1)+'%':'-'}</div></div>
+  `;
+
+  const top5=sorted.slice(0,5);
+  mkBarChart('chart-tomadores', top5.map(t=>t.nome.split(' ')[0]), [{
+    label:'Faturamento', data:top5.map(t=>+t.total.toFixed(2)), backgroundColor:'#22c55e',
+  }], {horizontal:false});
+
+  const tbody=document.querySelector('#tbl-tomadores tbody');
+  tbody.innerHTML=sorted.map(t=>`<tr>
+    <td class="td-mono">${t.nome}</td>
+    <td class="td-mono">${fmtCNPJ(t.cnpj)}</td>
+    <td style="text-align:center">${t.count}</td>
+    <td class="td-green">${fmtBRL(t.total)}</td>
+    <td>${total?((t.total/total)*100).toFixed(1)+'%':'-'}</td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  EXPORTAR
+// ══════════════════════════════════════════════════
+function buildExportar() {
+  if (!allNotes.length) return;
+  document.getElementById('exp-empty').style.display = 'none';
+  document.getElementById('exp-content').style.display = 'block';
+
+  const total=allNotes.reduce((s,n)=>s+fmtNum(n.vServ),0);
+  document.getElementById('exp-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">NOTAS</div><div class="stat-value">${allNotes.length}</div></div>
+    <div class="stat-card"><div class="stat-label">TOTAL</div><div class="stat-value green">${fmtBRL(total)}</div></div>
+  `;
+
+  const tbody=document.querySelector('#tbl-export tbody');
+  tbody.innerHTML=allNotes.map((n,i)=>`<tr>
+    <td>${i+1}</td>
+    <td class="td-mono">${n.nNFSe||'-'}</td>
+    <td class="td-mono">${fmtData(n.dCompet||n.dhProc)}</td>
+    <td>${(n.emitNome||'-').split(' ').slice(0,2).join(' ')}</td>
+    <td>${(n.tomaNome||'-').split(' ').slice(0,2).join(' ')}</td>
+    <td class="td-green">${fmtBRL(n.vServ)}</td>
+    <td>${fmtBRL(n.vLiq)}</td>
+  </tr>`).join('');
+}
+
+function exportXLSX() {
+  const rows = allNotes.map(n=>({
+    'Número NFS-e':   n.nNFSe,
+    'Competência':    fmtData(n.dCompet),
+    'Emissão':        fmtData(n.dhProc),
+    'Prestador':      n.emitNome,
+    'CNPJ Prestador': fmtCNPJ(n.emitCNPJ),
+    'Tomador':        n.tomaNome,
+    'CNPJ Tomador':   fmtCNPJ(n.tomaCNPJ),
+    'Descrição':      n.xDescServ,
+    'Valor Serviço':  fmtNum(n.vServ),
+    'Valor Líquido':  fmtNum(n.vLiq),
+    '% Fed':          fmtNum(n.pTotTribFed),
+    '% Mun':          fmtNum(n.pTotTribMun),
+    '% Est':          fmtNum(n.pTotTribEst),
+    'Chave':          n.chave,
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'NFS-e');
+  XLSX.writeFile(wb, 'nfse_export.xlsx');
+}
+
+// ══════════════════════════════════════════════════
+//  VALIDAÇÃO
+// ══════════════════════════════════════════════════
+function validateNote(n) {
+  const errs=[], warns=[];
+  if(n.cStat && n.cStat !== '100') errs.push(`cStat = ${n.cStat} (esperado 100 — nota pode não estar autorizada)`);
+  const vServ=fmtNum(n.vServ), vLiq=fmtNum(n.vLiq);
+  if(vLiq>vServ) errs.push(`Valor líquido (${fmtBRL(vLiq)}) maior que valor do serviço (${fmtBRL(vServ)})`);
+  if(!n.tomaCNPJ) warns.push('Tomador sem CNPJ identificado');
+  if(!n.xDescServ) warns.push('Descrição do serviço vazia');
+  const cnpj=n.emitCNPJ.replace(/\D/g,'');
+  if(cnpj.length!==14) errs.push(`CNPJ do prestador com ${cnpj.length} dígitos (esperado 14)`);
+  if(!n.dCompet) warns.push('Campo dCompet (competência) não encontrado');
+  if(vServ===0) warns.push('Valor do serviço = R$ 0,00');
+  return {errs, warns, ok: errs.length===0 && warns.length===0};
+}
+
+function buildValidacao() {
+  if (!allNotes.length) return;
+  document.getElementById('val-empty').style.display = 'none';
+  document.getElementById('val-content').style.display = 'block';
+
+  const results=allNotes.map(n=>({n, ...validateNote(n)}));
+  const totalOk=results.filter(r=>r.ok).length;
+  const totalErrs=results.filter(r=>r.errs.length).length;
+  const totalWarns=results.filter(r=>r.warns.length&&!r.errs.length).length;
+
+  document.getElementById('val-stats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">OK</div><div class="stat-value green">${totalOk}</div></div>
+    <div class="stat-card"><div class="stat-label">COM ALERTAS</div><div class="stat-value" style="color:var(--warn)">${totalWarns}</div></div>
+    <div class="stat-card"><div class="stat-label">COM ERROS</div><div class="stat-value" style="color:var(--danger)">${totalErrs}</div></div>
+  `;
+
+  const list=document.getElementById('val-list');
+  list.innerHTML=results.map(r=>{
+    const cls=r.errs.length?'alert-danger':r.warns.length?'alert-warn':'alert-ok';
+    const icon=r.errs.length?'ti-alert-circle':r.warns.length?'ti-alert-triangle':'ti-circle-check';
+    const msgs=[...r.errs.map(e=>`❌ ${e}`),...r.warns.map(w=>`⚠️ ${w}`)];
+    return `<div class="alert ${cls}">
+      <i class="ti ${icon}"></i>
+      <div><b>NFS-e ${r.n.nNFSe||'?'}</b> — ${r.n.emitNome||'-'}<br>
+      ${msgs.length?msgs.join('<br>'):'Nenhuma inconsistência encontrada.'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  HISTÓRICO
+// ══════════════════════════════════════════════════
+function buildHistorico() {
+  const hasNotes = allNotes.length > 0;
+  document.getElementById('hist-empty').style.display = hasNotes?'none':'block';
+  document.getElementById('hist-content').style.display = hasNotes?'block':'none';
+  if (!hasNotes) return;
+
+  const tbody=document.querySelector('#tbl-historico tbody');
+  tbody.innerHTML=allNotes.map(n=>{
+    const v=validateNote(n);
+    const badge=v.errs.length?'<span class="badge badge-danger">Erro</span>':v.warns.length?'<span class="badge badge-warn">Alerta</span>':'<span class="badge badge-green">OK</span>';
+    return `<tr>
+      <td class="td-mono">${n.nNFSe||'-'}</td>
+      <td class="td-mono">${fmtData(n.dhProc)}</td>
+      <td>${(n.emitNome||'-').split(' ').slice(0,2).join(' ')}</td>
+      <td>${(n.tomaNome||'-').split(' ').slice(0,2).join(' ')}</td>
+      <td class="td-green">${fmtBRL(n.vLiq)}</td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+//  SIMULADOR
+// ══════════════════════════════════════════════════
+function buildSimulador() {
+  const fatAnual = allNotes.length
+    ? allNotes.reduce((s,n)=>s+fmtNum(n.vServ),0) * (12/Math.max(new Set(allNotes.map(n=>(n.dCompet||'').slice(0,7))).size,1))
+    : 0;
+  if (fatAnual > 0 && !document.getElementById('simul-fat').value) {
+    document.getElementById('simul-fat').value = Math.round(fatAnual);
+  }
+  calcSimul();
+}
+
+let simulChart = null;
+function calcSimul() {
+  const fat = parseFloat(document.getElementById('simul-fat').value)||0;
+  const ativ= document.getElementById('simul-ativ').value;
+  if (!fat) { document.getElementById('simul-result').innerHTML=''; return; }
+
+  // Alíquotas estimadas (2024, faixa aproximada)
+  const tabelas = {
+    servicos_tec:  { sn:{ aliq:.06,  iss:.025, desc:'Anexo III/V SN' }, lp:{ pis:.0065, cofins:.03, csll:.032, irpj:.048, iss:.05 }, lr:{ aliq:.33 } },
+    servicos_prof: { sn:{ aliq:.155, iss:.025, desc:'Anexo IV SN'    }, lp:{ pis:.0065, cofins:.03, csll:.032, irpj:.048, iss:.05 }, lr:{ aliq:.33 } },
+    comercio:      { sn:{ aliq:.04,  iss:0,    desc:'Anexo I SN'     }, lp:{ pis:.0065, cofins:.03, csll:.032, irpj:.048, iss:.03 }, lr:{ aliq:.30 } },
+  };
+  const t=tabelas[ativ];
+
+  const tribSN = fat*(t.sn.aliq);
+  const tribLP = fat*(t.lp.pis+t.lp.cofins+t.lp.csll+t.lp.irpj+t.lp.iss);
+  const tribLR = fat*t.lr.aliq;
+  const liqSN=fat-tribSN, liqLP=fat-tribLP, liqLR=fat-tribLR;
+  const melhor=Math.min(tribSN,tribLP,tribLR);
+
+  const card=(titulo,trib,liq,hl,detalhe)=>`
+    <div class="simul-card ${hl?'highlight':''}">
+      <div class="simul-card-title"><i class="ti ${hl?'ti-star':'ti-receipt'}" aria-hidden="true"></i>${titulo}${hl?' <span class="badge badge-green" style="font-size:9px">recomendado</span>':''}</div>
+      <div class="simul-val">${fmtBRL(trib)}/ano</div>
+      <div class="simul-detail">${detalhe}<br>Líquido estimado: <b style="color:var(--text)">${fmtBRL(liq)}</b></div>
+    </div>`;
+
+  document.getElementById('simul-result').innerHTML=`<div class="simul-grid">
+    ${card('Simples Nacional', tribSN, liqSN, tribSN===melhor, `Alíq. efetiva ~${(t.sn.aliq*100).toFixed(1)}% · ${t.sn.desc}`)}
+    ${card('Lucro Presumido',  tribLP, liqLP, tribLP===melhor, `PIS+COFINS+CSLL+IRPJ+ISS estimados`)}
+    ${card('Lucro Real',       tribLR, liqLR, tribLR===melhor, `Alíq. efetiva estimada ~${(t.lr.aliq*100).toFixed(0)}%`)}
+  </div>`;
+
+  destroyChart('chart-simul');
+  const ctx=document.getElementById('chart-simul');
+  if(ctx) charts['chart-simul']=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['Simples Nacional','Lucro Presumido','Lucro Real'],
+      datasets:[
+        {label:'Tributos',data:[+tribSN.toFixed(2),+tribLP.toFixed(2),+tribLR.toFixed(2)],backgroundColor:['#22c55e','#3b82f6','#f59e0b'],borderRadius:4,borderWidth:0},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,.05)'}},
+        y:{grid:{color:'rgba(255,255,255,.05)'},ticks:{callback:v=>'R$ '+v.toLocaleString('pt-BR')}}
+      }
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+//  PDF GENERATOR (fiel ao DANFSe)
+// ══════════════════════════════════════════════════
+function opSimpNacLabel(v){const m={'1':'Não optante','2':'Optante - MEI','3':'Optante - ME/EPP','4':'Optante - Demais'};return m[v]||v;}
+function regApTribSNLabel(v){const m={'1':'Regime federal e municipal pelo Simples Nacional','2':'Federal pelo SN, municipal fora do SN','3':'Municipal pelo SN, federal fora do SN'};return m[v]||v;}
+function tribISSQNLabel(v){const m={'1':'Operação Tributável','2':'Isenta','3':'Imune','4':'Suspensa','5':'Exportação'};return m[v]||v;}
+function retISSQNLabel(v){const m={'1':'Não Retido','2':'Retido pelo Tomador','3':'Retido pelo Intermediário'};return m[v]||v;}
+function regEspTribLabel(v){const m={'0':'Nenhum','1':'Microempresa Municipal','2':'Estimativa','3':'Soc. de Profissionais','4':'Cooperativa','5':'MEI','6':'ME/EPP'};return m[v]||v;}
+
+function gerarPDF(d, nome) {
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({format:'a4',unit:'mm'});
+  const PW=210,ML=10,MR=10,TW=PW-ML-MR;
+  let y=0;
+
+  const setFill=(r,g,b)=>doc.setFillColor(r,g,b);
+  const setStroke=(r,g,b)=>doc.setDrawColor(r,g,b);
+  const WHITE=[255,255,255],BLACK=[0,0,0],GRAY=[100,100,100];
+  const NAVY=[30,60,120],NAVY_LIGHT=[220,228,245];
+  const GREEN_DARK=[0,100,60],GREEN_LIGHT=[220,245,232];
+
+  function t(text,x,yy,opts={}){
+    const{size=9,bold=false,color=BLACK,align='left',maxW=null}=opts;
+    doc.setFontSize(size);doc.setFont('helvetica',bold?'bold':'normal');doc.setTextColor(...color);
+    if(maxW){const ls=doc.splitTextToSize(String(text||''),maxW);doc.text(ls,x,yy,{align});return ls.length*(size*0.38);}
+    doc.text(String(text||''),x,yy,{align});return size*0.38;
   }
 
-  // ── horizontal rule
-  function hr(yy, color=[200,200,200], lw=0.2) {
-    setStroke(...color);
-    doc.setLineWidth(lw);
-    doc.line(ML, yy, ML+TW, yy);
+  function hr(yy,color=[200,200,200],lw=0.2){setStroke(...color);doc.setLineWidth(lw);doc.line(ML,yy,ML+TW,yy);}
+
+  function sectionBar(label,yy){
+    setFill(...NAVY);doc.rect(ML,yy,TW,6,'F');
+    t(label,ML+2,yy+4.2,{size:8,bold:true,color:WHITE});
+    return yy+6;
   }
 
-  // ── section header (blue bar)
-  function sectionBar(label, yy) {
-    setFill(...NAVY);
-    doc.rect(ML, yy, TW, 6, 'F');
-    txt(label, ML+2, yy+4.2, {size:8, bold:true, color:WHITE});
-    return yy + 6;
-  }
-
-  // ── two-column label+value row
-  function row2(label, value, x, yy, colW) {
-    txt(label, x, yy, {size:7.5, bold:true, color:GRAY});
-    const h = txt(value||'-', x, yy+3.8, {size:8.5, color:BLACK, maxW:colW-2});
-    return Math.max(h * (8.5*0.38), 3.8) + 3.8 + 1;
-  }
-
-  // ── full-width label+value
-  function rowFull(label, value, yy) {
-    txt(label, ML, yy, {size:7.5, bold:true, color:GRAY});
-    const h = txt(value||'-', ML, yy+3.8, {size:8.5, color:BLACK, maxW:TW});
-    return Math.max(h, 3.8) + 3.8 + 2;
-  }
-
-  // ── table row (key | value pairs in columns)
-  function tableRow(cols, yy, rowH=8) {
-    setStroke(210,210,210); doc.setLineWidth(0.1);
-    let x = ML;
-    cols.forEach(({label, value, w, bold=false}) => {
-      doc.rect(x, yy, w, rowH, 'S');
-      txt(label, x+1.5, yy+3, {size:6.5, bold:true, color:GRAY});
-      txt(value||'-', x+1.5, yy+6.5, {size:7.5, bold, color:BLACK, maxW:w-3});
-      x += w;
+  function tableRow(cols,yy,rowH=10){
+    setStroke(210,210,210);doc.setLineWidth(0.1);
+    let x=ML;
+    cols.forEach(({label,value,w,bold=false})=>{
+      doc.rect(x,yy,w,rowH,'S');
+      t(label,x+1.5,yy+3,{size:6.5,bold:true,color:GRAY});
+      t(value||'-',x+1.5,yy+7,{size:8,bold,color:BLACK,maxW:w-3});
+      x+=w;
     });
     return rowH;
   }
 
-  // ═══════════════════════════════════════════════
-  // HEADER
-  // ═══════════════════════════════════════════════
-  y = 8;
+  y=8;
+  setFill(...NAVY);doc.rect(ML,y,38,16,'F');
+  t('NFS-e',ML+2,y+7,{size:14,bold:true,color:WHITE});
+  t('Nota Fiscal de',ML+2,y+11.5,{size:6,color:[180,200,255]});
+  t('Serviço Eletrônica',ML+2,y+14.5,{size:6,color:[180,200,255]});
+  t('DANFSe v1.0',ML+TW/2,y+5,{size:11,bold:true,color:NAVY,align:'center'});
+  t('Documento Auxiliar da NFS-e',ML+TW/2,y+10,{size:9,color:NAVY,align:'center'});
+  t('Prefeitura do Recife',ML+TW,y+5,{size:8,bold:true,color:NAVY,align:'right'});
+  t('Secretaria de Finanças',ML+TW,y+9.5,{size:7,color:GRAY,align:'right'});
+  t('faleconosco@recife.pe.gov.br',ML+TW,y+13.5,{size:6.5,color:GRAY,align:'right'});
+  y+=19;hr(y,[30,60,120],0.5);y+=3;
 
-  // Logo NFS-e box (left)
-  setFill(...NAVY);
-  doc.rect(ML, y, 38, 16, 'F');
-  txt('NFS-e', ML+2, y+7, {size:14, bold:true, color:WHITE});
-  txt('Nota Fiscal de', ML+2, y+11.5, {size:6, color:[180,200,255]});
-  txt('Serviço Eletrônica', ML+2, y+14.5, {size:6, color:[180,200,255]});
+  setFill(...NAVY_LIGHT);doc.rect(ML,y,TW,10,'F');
+  t('Chave de Acesso da NFS-e',ML+2,y+3.5,{size:7,bold:true,color:NAVY});
+  t(d.chave||'-',ML+2,y+8,{size:7.5,bold:true,color:BLACK,maxW:TW-22});
+  setFill(230,230,230);setStroke(180,180,180);doc.rect(ML+TW-18,y+1,16,8,'FD');
+  t('QR',ML+TW-10,y+6,{size:7,color:GRAY,align:'center'});
+  y+=13;
+  t('A autenticidade desta NFS-e pode ser verificada pela leitura do código QR ou pela consulta da chave de acesso no portal nacional da NFS-e.',ML,y,{size:6.5,color:GRAY,maxW:TW});
+  y+=6;hr(y);y+=3;
 
-  // Center title
-  txt('DANFSe v1.0', ML+TW/2, y+5, {size:11, bold:true, color:NAVY, align:'center'});
-  txt('Documento Auxiliar da NFS-e', ML+TW/2, y+10, {size:9, color:NAVY, align:'center'});
+  const c3=TW/3;
+  y+=tableRow([{label:'Número da NFS-e',value:d.nNFSe,w:c3},{label:'Competência da NFS-e',value:fmtData(d.dCompet),w:c3},{label:'Data e Hora da emissão da NFS-e',value:fmtData(d.dhProc),w:c3}],y,10);
+  y+=tableRow([{label:'Número da DPS',value:d.nDPS,w:c3},{label:'Série da DPS',value:d.serie,w:c3},{label:'Data e Hora da emissão da DPS',value:fmtData(d.dhEmi),w:c3}],y,10);
+  y+=4;
 
-  // Right: prefeitura
-  txt('Prefeitura do Recife', ML+TW, y+5, {size:8, bold:true, color:NAVY, align:'right'});
-  txt('Secretaria de Finanças', ML+TW, y+9.5, {size:7, color:GRAY, align:'right'});
-  txt('faleconosco@recife.pe.gov.br', ML+TW, y+13.5, {size:6.5, color:GRAY, align:'right'});
+  y=sectionBar('EMITENTE DA NFS-e   |   Prestador do Serviço',y)+2;
+  y+=tableRow([{label:'CNPJ / CPF / NIF',value:fmtCNPJ(d.emitCNPJ),w:TW*.38},{label:'Inscrição Municipal',value:d.emitIM,w:TW*.31},{label:'Telefone',value:fmtFone(d.emitFone),w:TW*.31}],y,10);
+  y+=tableRow([{label:'Nome / Nome Empresarial',value:d.emitNome,w:TW/2,bold:true},{label:'E-mail',value:d.emitEmail,w:TW/2}],y,10);
+  const emitEnd=[d.emitLgr,d.emitNro,d.emitCpl,d.emitBairro].filter(Boolean).join(', ');
+  y+=tableRow([{label:'Endereço',value:emitEnd,w:TW*.50},{label:'Município',value:nomeMun(d.emitCMun),w:TW*.30},{label:'CEP',value:fmtCEP(d.emitCEP),w:TW*.20}],y,10);
+  y+=tableRow([{label:'Simples Nacional na Data de Competência',value:opSimpNacLabel(d.opSimpNac),w:TW/2},{label:'Regime de Apuração Tributária pelo SN',value:regApTribSNLabel(d.regApTribSN),w:TW/2}],y,14);
+  y+=4;
 
-  y += 19;
-  hr(y, NAVY, 0.5);
-  y += 3;
+  y=sectionBar('TOMADOR DO SERVIÇO',y)+2;
+  y+=tableRow([{label:'CNPJ / CPF / NIF',value:fmtCNPJ(d.tomaCNPJ),w:TW*.38},{label:'Inscrição Municipal',value:d.tomaIM,w:TW*.31},{label:'Telefone',value:fmtFone(d.tomaFone),w:TW*.31}],y,10);
+  y+=tableRow([{label:'Nome / Nome Empresarial',value:d.tomaNome,w:TW/2,bold:true},{label:'E-mail',value:d.tomaEmail,w:TW/2}],y,10);
+  const tomaEnd=[d.tomaLgr,d.tomaNro,d.tomaCpl,d.tomaBairro].filter(Boolean).join(', ');
+  y+=tableRow([{label:'Endereço',value:tomaEnd,w:TW*.50},{label:'Município',value:nomeMun(d.tomaCMun),w:TW*.30},{label:'CEP',value:fmtCEP(d.tomaCEP),w:TW*.20}],y,10);
+  y+=2;
+  setFill(245,245,245);doc.rect(ML,y,TW,6,'F');hr(y,[200,200,200],0.1);hr(y+6,[200,200,200],0.1);
+  t('INTERMEDIÁRIO DO SERVIÇO   NÃO IDENTIFICADO NA NFS-e',ML+TW/2,y+4,{size:7.5,color:GRAY,align:'center'});y+=9;
 
-  // ═══════════════════════════════════════════════
-  // CHAVE DE ACESSO
-  // ═══════════════════════════════════════════════
-  setFill(...NAVY_LIGHT);
-  doc.rect(ML, y, TW, 10, 'F');
-  txt('Chave de Acesso da NFS-e', ML+2, y+3.5, {size:7, bold:true, color:NAVY});
-  txt(d.chave || '-', ML+2, y+8, {size:7.5, bold:true, color:BLACK, maxW:TW-30});
-  // QR placeholder
-  setFill(230,230,230); setStroke(180,180,180);
-  doc.rect(ML+TW-18, y+1, 16, 8, 'FD');
-  txt('QR', ML+TW-10, y+6, {size:7, color:GRAY, align:'center'});
-  y += 13;
+  y=sectionBar('SERVIÇO PRESTADO',y)+2;
+  const cTribNacFmt=d.cTribNac?d.cTribNac.replace(/(\d{2})(\d{2})(\d{2})/,'$1.$2.$3'):'';
+  y+=tableRow([{label:'Código de Tributação Nacional',value:`${cTribNacFmt} - ${d.xTribNac}`,w:TW*.33},{label:'Código de Tributação Municipal',value:`${d.cTribMun} - ${d.xTribMun}`,w:TW*.33},{label:'Local da Prestação',value:nomeMun(d.cLocPrest),w:TW*.17},{label:'País da Prestação',value:'-',w:TW*.17}],y,14);
+  y+=tableRow([{label:'Descrição do Serviço',value:d.xDescServ,w:TW}],y,10);y+=4;
 
-  txt('A autenticidade desta NFS-e pode ser verificada pela leitura do código QR ou pela consulta da chave de acesso no portal nacional da NFS-e.', ML, y, {size:6.5, color:GRAY, maxW:TW});
-  y += 6;
-  hr(y); y += 3;
+  y=sectionBar('TRIBUTAÇÃO MUNICIPAL',y)+2;
+  y+=tableRow([{label:'Tributação do ISSQN',value:tribISSQNLabel(d.tribISSQN),w:TW*.25},{label:'País Resultado da Prestação',value:'-',w:TW*.25},{label:'Município de Incidência do ISSQN',value:nomeMun(d.cLocIncid||d.xLocIncid),w:TW*.25},{label:'Regime Especial de Tributação',value:regEspTribLabel(d.regEspTrib),w:TW*.25}],y,10);
+  y+=tableRow([{label:'Tipo de Imunidade',value:'-',w:TW*.25},{label:'Suspensão da Exigibilidade',value:'Não',w:TW*.25},{label:'Número Processo Suspensão',value:'-',w:TW*.25},{label:'Benefício Municipal',value:'-',w:TW*.25}],y,10);
+  y+=tableRow([{label:'Valor do Serviço',value:fmtBRL(d.vServ),w:TW*.25,bold:true},{label:'Desconto Incond.',value:'-',w:TW*.25},{label:'Total Deduções',value:'-',w:TW*.25},{label:'Cálculo do BM',value:'-',w:TW*.25}],y,10);
+  y+=tableRow([{label:'BC ISSQN',value:'-',w:TW*.25},{label:'Alíquota Aplicada',value:'-',w:TW*.25},{label:'Retenção do ISSQN',value:retISSQNLabel(d.tpRetISSQN),w:TW*.25},{label:'ISSQN Apurado',value:'-',w:TW*.25}],y,10);y+=4;
 
-  // ═══════════════════════════════════════════════
-  // LINHA: número, competência, emissão NFS-e, nDPS, série, emissão DPS
-  // ═══════════════════════════════════════════════
-  const colW6 = TW/3;
-  y += tableRow([
-    {label:'Número da NFS-e',          value: d.nNFSe,              w: colW6},
-    {label:'Competência da NFS-e',     value: formatData(d.dCompet), w: colW6},
-    {label:'Data e Hora da emissão da NFS-e', value: formatData(d.dhProc), w: colW6},
-  ], y, 10);
-  y += tableRow([
-    {label:'Número da DPS',            value: d.nDPS,               w: colW6},
-    {label:'Série da DPS',             value: d.serie,              w: colW6},
-    {label:'Data e Hora da emissão da DPS', value: formatData(d.dhEmi), w: colW6},
-  ], y, 10);
-  y += 4;
+  y=sectionBar('TRIBUTAÇÃO FEDERAL',y)+2;
+  y+=tableRow([{label:'IRRF',value:'-',w:TW*.25},{label:'Contrib. Previdenciária Retida',value:'-',w:TW*.25},{label:'Contribuições Sociais Retidas',value:'-',w:TW*.25},{label:'Descrição Contrib. Sociais',value:'-',w:TW*.25}],y,10);
+  y+=tableRow([{label:'PIS - Déb. Apur. Própria',value:'-',w:TW*.5},{label:'COFINS - Déb. Apur. Própria',value:'-',w:TW*.5}],y,10);y+=4;
 
-  // ═══════════════════════════════════════════════
-  // EMITENTE
-  // ═══════════════════════════════════════════════
-  y = sectionBar('EMITENTE DA NFS-e   |   Prestador do Serviço', y) + 2;
+  y=sectionBar('VALOR TOTAL DA NFS-E',y)+2;
+  y+=tableRow([{label:'Valor do Serviço',value:fmtBRL(d.vServ),w:TW*.25,bold:true},{label:'Desconto Condicionado',value:'-',w:TW*.25},{label:'Desconto Incondicionado',value:'-',w:TW*.25},{label:'ISSQN Retido',value:'-',w:TW*.25}],y,10);
+  setFill(...GREEN_LIGHT);doc.rect(ML,y,TW,12,'F');setStroke(...GREEN_DARK);doc.setLineWidth(0.4);doc.rect(ML,y,TW,12,'S');
+  t('Total das Retenções Federais',ML+1.5,y+3.5,{size:6.5,bold:true,color:GRAY});t('-',ML+1.5,y+8,{size:8,color:BLACK});
+  t('PIS/COFINS - Déb. Apur. Própria',ML+TW*.33+1.5,y+3.5,{size:6.5,bold:true,color:GRAY});t('-',ML+TW*.33+1.5,y+8,{size:8,color:BLACK});
+  t('Valor Líquido da NFS-e',ML+TW*.67+1.5,y+3.5,{size:6.5,bold:true,color:GREEN_DARK});
+  t(fmtBRL(d.vLiq),ML+TW*.67+1.5,y+8.5,{size:10,bold:true,color:GREEN_DARK});y+=15;
 
-  const hw = TW/2;
-  // Row 1: CNPJ | IM | Fone
-  y += tableRow([
-    {label:'CNPJ / CPF / NIF',   value: formatCNPJ(d.emitCNPJ), w: TW*0.38},
-    {label:'Inscrição Municipal', value: d.emitIM,                w: TW*0.31},
-    {label:'Telefone',            value: formatFone(d.emitFone),  w: TW*0.31},
-  ], y, 10);
-  // Row 2: Nome | Email
-  y += tableRow([
-    {label:'Nome / Nome Empresarial', value: d.emitNome,  w: hw, bold:true},
-    {label:'E-mail',                  value: d.emitEmail, w: hw},
-  ], y, 10);
-  // Row 3: Endereço | Município | CEP
-  const emitEnd = [d.emitLgr, d.emitNro, d.emitCpl, d.emitBairro].filter(Boolean).join(', ');
-  y += tableRow([
-    {label:'Endereço', value: emitEnd,                    w: TW*0.50},
-    {label:'Município',value: `${nomeMun(d.emitCMun)}`,   w: TW*0.30},
-    {label:'CEP',      value: formatCEP(d.emitCEP),       w: TW*0.20},
-  ], y, 10);
-  // Simples Nacional
-  y += tableRow([
-    {label:'Simples Nacional na Data de Competência', value: opSimpNacLabel(d.opSimpNac), w: hw},
-    {label:'Regime de Apuração Tributária pelo SN',   value: regApTribSNLabel(d.regApTribSN), w: hw},
-  ], y, 14);
-  y += 4;
+  y=sectionBar('TOTAIS APROXIMADOS DOS TRIBUTOS',y)+2;
+  y+=tableRow([{label:'Federais',value:`${d.pTotTribFed||'0,00'} %`,w:TW/3},{label:'Estaduais',value:`${d.pTotTribEst||'0,00'} %`,w:TW/3},{label:'Municipais',value:`${d.pTotTribMun||'0,00'} %`,w:TW/3}],y,10);y+=4;
 
-  // ═══════════════════════════════════════════════
-  // TOMADOR
-  // ═══════════════════════════════════════════════
-  y = sectionBar('TOMADOR DO SERVIÇO', y) + 2;
-
-  y += tableRow([
-    {label:'CNPJ / CPF / NIF',   value: formatCNPJ(d.tomaCNPJ), w: TW*0.38},
-    {label:'Inscrição Municipal', value: d.tomaIM,                w: TW*0.31},
-    {label:'Telefone',            value: formatFone(d.tomaFone),  w: TW*0.31},
-  ], y, 10);
-  y += tableRow([
-    {label:'Nome / Nome Empresarial', value: d.tomaNome,  w: hw, bold:true},
-    {label:'E-mail',                  value: d.tomaEmail, w: hw},
-  ], y, 10);
-  const tomaEnd = [d.tomaLgr, d.tomaNro, d.tomaCpl, d.tomaBairro].filter(Boolean).join(', ');
-  y += tableRow([
-    {label:'Endereço', value: tomaEnd,                   w: TW*0.50},
-    {label:'Município',value: nomeMun(d.tomaCMun),        w: TW*0.30},
-    {label:'CEP',      value: formatCEP(d.tomaCEP),       w: TW*0.20},
-  ], y, 10);
-  y += 2;
-
-  // Intermediário
-  setFill(245,245,245); doc.rect(ML, y, TW, 6, 'F');
-  hr(y, [200,200,200], 0.1); hr(y+6, [200,200,200], 0.1);
-  txt('INTERMEDIÁRIO DO SERVIÇO   NÃO IDENTIFICADO NA NFS-e', ML+TW/2, y+4, {size:7.5, color:GRAY, align:'center'});
-  y += 9;
-
-  // ═══════════════════════════════════════════════
-  // SERVIÇO PRESTADO
-  // ═══════════════════════════════════════════════
-  y = sectionBar('SERVIÇO PRESTADO', y) + 2;
-
-  const cTribNacFmt = d.cTribNac ? d.cTribNac.replace(/(\d{2})(\d{2})(\d{2})/,'$1.$2.$3') : '';
-  y += tableRow([
-    {label:'Código de Tributação Nacional',  value: `${cTribNacFmt} - ${d.xTribNac}`, w: TW*0.33},
-    {label:'Código de Tributação Municipal', value: `${d.cTribMun} - ${d.xTribMun}`,  w: TW*0.33},
-    {label:'Local da Prestação',             value: nomeMun(d.cLocPrest),               w: TW*0.17},
-    {label:'País da Prestação',              value: '-',                                w: TW*0.17},
-  ], y, 14);
-  y += tableRow([
-    {label:'Descrição do Serviço', value: d.xDescServ, w: TW},
-  ], y, 10);
-  y += 4;
-
-  // ═══════════════════════════════════════════════
-  // TRIBUTAÇÃO MUNICIPAL
-  // ═══════════════════════════════════════════════
-  y = sectionBar('TRIBUTAÇÃO MUNICIPAL', y) + 2;
-
-  y += tableRow([
-    {label:'Tributação do ISSQN',                value: tribISSQNLabel(d.tribISSQN), w: TW*0.25},
-    {label:'País Resultado da Prestação',        value: '-',                          w: TW*0.25},
-    {label:'Município de Incidência do ISSQN',   value: nomeMun(d.cLocIncid || d.xLocIncid), w: TW*0.25},
-    {label:'Regime Especial de Tributação',      value: regEspTribLabel(d.regEspTrib), w: TW*0.25},
-  ], y, 10);
-  y += tableRow([
-    {label:'Tipo de Imunidade',              value: '-', w: TW*0.25},
-    {label:'Suspensão da Exigibilidade',     value: 'Não', w: TW*0.25},
-    {label:'Número Processo Suspensão',      value: '-', w: TW*0.25},
-    {label:'Benefício Municipal',            value: '-', w: TW*0.25},
-  ], y, 10);
-  y += tableRow([
-    {label:'Valor do Serviço',   value: formatValor(d.vServ), w: TW*0.25, bold:true},
-    {label:'Desconto Incond.',   value: '-', w: TW*0.25},
-    {label:'Total Deduções',     value: '-', w: TW*0.25},
-    {label:'Cálculo do BM',      value: '-', w: TW*0.25},
-  ], y, 10);
-  y += tableRow([
-    {label:'BC ISSQN',           value: '-', w: TW*0.25},
-    {label:'Alíquota Aplicada',  value: '-', w: TW*0.25},
-    {label:'Retenção do ISSQN',  value: retISSQNLabel(d.tpRetISSQN), w: TW*0.25},
-    {label:'ISSQN Apurado',      value: '-', w: TW*0.25},
-  ], y, 10);
-  y += 4;
-
-  // ═══════════════════════════════════════════════
-  // TRIBUTAÇÃO FEDERAL
-  // ═══════════════════════════════════════════════
-  y = sectionBar('TRIBUTAÇÃO FEDERAL', y) + 2;
-
-  y += tableRow([
-    {label:'IRRF',                            value:'-', w:TW*0.25},
-    {label:'Contrib. Previdenciária Retida',  value:'-', w:TW*0.25},
-    {label:'Contribuições Sociais Retidas',   value:'-', w:TW*0.25},
-    {label:'Descrição Contrib. Sociais',      value:'-', w:TW*0.25},
-  ], y, 10);
-  y += tableRow([
-    {label:'PIS - Déb. Apur. Própria',   value:'-', w:TW*0.5},
-    {label:'COFINS - Déb. Apur. Própria',value:'-', w:TW*0.5},
-  ], y, 10);
-  y += 4;
-
-  // ═══════════════════════════════════════════════
-  // VALOR TOTAL
-  // ═══════════════════════════════════════════════
-  y = sectionBar('VALOR TOTAL DA NFS-E', y) + 2;
-
-  y += tableRow([
-    {label:'Valor do Serviço',         value: formatValor(d.vServ), w:TW*0.25, bold:true},
-    {label:'Desconto Condicionado',    value:'-', w:TW*0.25},
-    {label:'Desconto Incondicionado',  value:'-', w:TW*0.25},
-    {label:'ISSQN Retido',             value:'-', w:TW*0.25},
-  ], y, 10);
-
-  // Valor líquido destacado
-  setFill(...GREEN_LIGHT);
-  doc.rect(ML, y, TW, 12, 'F');
-  setStroke(...GREEN_DARK); doc.setLineWidth(0.4);
-  doc.rect(ML, y, TW, 12, 'S');
-  txt('Total das Retenções Federais', ML+1.5, y+3.5, {size:6.5, bold:true, color:GRAY});
-  txt('-', ML+1.5, y+8, {size:8, color:BLACK});
-  txt('PIS/COFINS - Déb. Apur. Própria', ML+TW*0.33+1.5, y+3.5, {size:6.5, bold:true, color:GRAY});
-  txt('-', ML+TW*0.33+1.5, y+8, {size:8, color:BLACK});
-  txt('Valor Líquido da NFS-e', ML+TW*0.67+1.5, y+3.5, {size:6.5, bold:true, color:GREEN_DARK});
-  txt(formatValor(d.vLiq), ML+TW*0.67+1.5, y+8.5, {size:10, bold:true, color:GREEN_DARK});
-  y += 15;
-
-  // ═══════════════════════════════════════════════
-  // TOTAIS APROXIMADOS DOS TRIBUTOS
-  // ═══════════════════════════════════════════════
-  y = sectionBar('TOTAIS APROXIMADOS DOS TRIBUTOS', y) + 2;
-
-  y += tableRow([
-    {label:'Federais',   value: `${d.pTotTribFed || '0,00'} %`, w:TW/3},
-    {label:'Estaduais',  value: `${d.pTotTribEst || '0,00'} %`, w:TW/3},
-    {label:'Municipais', value: `${d.pTotTribMun || '0,00'} %`, w:TW/3},
-  ], y, 10);
-  y += 4;
-
-  // ═══════════════════════════════════════════════
-  // INFORMAÇÕES COMPLEMENTARES
-  // ═══════════════════════════════════════════════
-  y = sectionBar('INFORMAÇÕES COMPLEMENTARES', y) + 2;
-  if (d.cNBS || d.xNBS) {
-    y += tableRow([
-      {label:'NBS', value:`${d.cNBS||''} - ${d.xNBS||''}`.replace(/^- /,''), w:TW},
-    ], y, 10);
-  }
-  y += 4;
-
-  // ── rodapé
-  hr(y, NAVY, 0.4); y += 3;
-  txt(`Gerado automaticamente · processamento local · ${new Date().toLocaleDateString('pt-BR')}`, ML+TW/2, y, {size:6.5, color:GRAY, align:'center'});
+  y=sectionBar('INFORMAÇÕES COMPLEMENTARES',y)+2;
+  if(d.cNBS||d.xNBS){y+=tableRow([{label:'NBS',value:`${d.cNBS||''} - ${d.xNBS||''}`.replace(/^- /,''),w:TW}],y,10);}
+  y+=4;hr(y,[30,60,120],0.4);y+=3;
+  t(`Gerado automaticamente · processamento local · ${new Date().toLocaleDateString('pt-BR')}`,ML+TW/2,y,{size:6.5,color:GRAY,align:'center'});
 
   doc.save(nome);
 }
 
-// ── main ──────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════
+//  CONVERT ALL
+// ══════════════════════════════════════════════════
 async function convertAll() {
-  const btn = document.getElementById('btn-convert');
-  btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> Convertendo...';
-  for (let i = 0; i < files.length; i++) {
-    const s = document.getElementById('s' + i);
-    s.textContent = 'processando'; s.className = 'fstatus proc';
-    try {
-      const txt = await files[i].text();
-      const d = parseXML(txt);
-      gerarPDF(d, files[i].name.replace(/\.xml$/i, '') + '.pdf');
-      s.textContent = '✓ baixado'; s.className = 'fstatus ok';
-    } catch (e) {
-      s.textContent = '✗ erro'; s.className = 'fstatus err';
-      console.error(files[i].name, e);
+  const btn=document.getElementById('btn-convert');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Convertendo...';
+  for(let i=0;i<allNotes.length;i++){
+    const n=allNotes[i];
+    setStatus(n._idx,'proc','gerando...');
+    try{
+      gerarPDF(n, n._file.replace(/\.xml$/i,'')+'.pdf');
+      setStatus(n._idx,'ok','✓ baixado');
+    }catch(e){
+      setStatus(n._idx,'err','✗ erro');console.error(e);
     }
   }
-  btn.disabled = false; btn.innerHTML = '<i class="ti ti-download"></i> Gerar PDFs';
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-download"></i> Gerar PDFs';
 }
 </script>
 </body>
